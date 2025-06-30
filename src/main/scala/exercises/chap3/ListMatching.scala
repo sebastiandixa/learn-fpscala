@@ -1,3 +1,5 @@
+package exercises.chap3
+
 import exercises.chap3.FpList
 import exercises.chap3.FpList.*
 

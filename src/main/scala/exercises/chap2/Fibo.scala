@@ -1,3 +1,5 @@
+package exercises.chap2
+
 object FiboProgram:
 
   def fib(n: Int): Int =

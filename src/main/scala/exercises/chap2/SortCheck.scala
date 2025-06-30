@@ -1,3 +1,5 @@
+package exercises.chap2
+
 object SortCheck:
 
   def isSorted[A](as: Array[A], gt: (A, A) => Boolean): Boolean =
