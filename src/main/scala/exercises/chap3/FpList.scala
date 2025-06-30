@@ -95,3 +95,15 @@ object FpList:
 
   def filterAsFlatMap[A, B](as: FpList[A], f: A => Boolean): FpList[A] =
     flatMap(as, a => if f(a) then FpList(a) else Nil)
+
+  def addElements(x: FpList[Int], y: FpList[Int]): FpList[Int] =
+    (x, y) match
+      case (Nil, _)                   => Nil
+      case (_, Nil)                   => Nil
+      case (Cons(x, xs), Cons(y, ys)) => Cons(x + y, addElements(xs, ys))
+
+  def addElementsGeneric[A, B](x: FpList[A], y: FpList[A], f: (A, A) => B): FpList[B] =
+    (x, y) match
+      case (Nil, _)                   => Nil
+      case (_, Nil)                   => Nil
+      case (Cons(x, xs), Cons(y, ys)) => Cons(f(x, y), addElementsGeneric(xs, ys, f))

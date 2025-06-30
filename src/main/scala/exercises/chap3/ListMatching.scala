@@ -16,3 +16,7 @@ import exercises.chap3.FpList.*
   println(foldRight(FpList(1, 2, 3), Nil: FpList[Int], Cons(_, _)))
 
   println(flatMap(FpList(1, 2, 3), i => FpList(i, i)))
+
+  println(addElements(FpList(1, 2, 3), FpList(4, 5, 6)))
+  println(addElementsGeneric(FpList(1, 2, 3), FpList(4, 5, 6), (a, b) => a.toString + b.toString))
+  println(addElementsGeneric(FpList("foo", "bar", "baz"), FpList("baz", "bar", "foo"), _ ++ _))
