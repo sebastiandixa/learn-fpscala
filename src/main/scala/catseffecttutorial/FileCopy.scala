@@ -11,6 +11,7 @@ object Main extends IOApp {
     Resource.make {
       IO.blocking(new FileInputStream(f))
     } { inStream =>
+         new File("releasing-inputstream-ok.txt").createNewFile()
          IO.blocking(inStream.close()).handleErrorWith(_ => IO.unit) // release
     }
 
@@ -18,6 +19,7 @@ object Main extends IOApp {
     Resource.make {
       IO.blocking(new FileOutputStream(f))
     } { outStream =>
+      new File("releasing-outputStream-ok.txt").createNewFile()
       IO.blocking(outStream.close()).handleErrorWith(_ => IO.unit)
     }
 
