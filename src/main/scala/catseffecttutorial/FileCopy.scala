@@ -4,6 +4,7 @@ import cats.effect._
 import java.io._
 import scala.concurrent.duration.DurationInt
 import cats.effect.std.Console
+import scala.math.Numeric.Implicits.infixNumericOps
 
 object Main extends IOApp {
 
@@ -38,10 +39,18 @@ object Main extends IOApp {
       _ <- IO.sleep(5.second)
     } yield count // Returns the actual amount of bytes transferred
 
+  def transferDir(in: File, out: File): IO[Long] =
+    (in.listFiles().filter(!_.isDirectory).map(f => copy(f, new File(out, f.getName))) ++ in.listFiles().filter(
+      _.isDirectory
+    ).map(f => transferDir(f, new File(out, f.getName)))).reduceLeft(_ + _)
+
   def copy(origin: File, destination: File): IO[Long] =
-    inputOutputStreams(origin, destination).use { case (in, out) =>
-      transfer(in, out, new Array[Byte](1024 * 10), 0)
-    }
+    if origin.isDirectory then
+      transferDir(origin, destination)
+    else
+      inputOutputStreams(origin, destination).use { case (in, out) =>
+        transfer(in, out, new Array[Byte](1024 * 10), 0)
+      }
 
   def checkOverwrite(): IO[Unit] =
     for {
