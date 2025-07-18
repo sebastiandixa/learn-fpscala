@@ -4,12 +4,11 @@ import cats.effect._
 import cats.syntax.all._
 import java.io._
 
-
 object PolyMain extends IOApp {
 
   def inputStream[F[_]: Sync](f: File): Resource[F, FileInputStream] =
     Resource.make {
-      Sync[F].blocking(new FileInputStream(f))                         // build
+      Sync[F].blocking(new FileInputStream(f)) // build
     } { inStream =>
       Sync[F].blocking(inStream.close()).handleErrorWith(_ => Sync[F].unit) // release
     }
@@ -30,8 +29,9 @@ object PolyMain extends IOApp {
   def transfer[F[_]: Sync](origin: InputStream, destination: OutputStream, buffer: Array[Byte], acc: Long): F[Long] =
     for {
       amount <- Sync[F].blocking(origin.read(buffer, 0, buffer.length))
-      count <- if (amount > -1) Sync[F].blocking(destination.write(buffer, 0, amount)) >> transfer(origin, destination, buffer, acc + amount)
-              else Sync[F].pure(acc)
+      count <- if (amount > -1)
+        Sync[F].blocking(destination.write(buffer, 0, amount)) >> transfer(origin, destination, buffer, acc + amount)
+      else Sync[F].pure(acc)
     } yield count // Returns the actual amount of bytes transferred
 
   def copy[F[_]: Sync](origin: File, destination: File): F[Long] =
