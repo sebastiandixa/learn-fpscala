@@ -1,6 +1,6 @@
 package catseffecttutorial.producerconsumer
 
-import cats.effect.{Async, Deferred, ExitCode, IO, IOApp, Ref}
+import cats.effect.{ Async, Deferred, ExitCode, IO, IOApp, Ref }
 import cats.effect.std.Console
 import cats.instances.list._
 import cats.syntax.all._
@@ -8,16 +8,21 @@ import scala.collection.immutable.Queue
 
 object BoundedQueueConsumerProducer extends IOApp {
 
-  case class State[F[_], A](queue: Queue[A], capacity: Int, takers: Queue[Deferred[F,A]], offerers: Queue[(A, Deferred[F,Unit])])
+  case class State[F[_], A](
+      queue: Queue[A],
+      capacity: Int,
+      takers: Queue[Deferred[F, A]],
+      offerers: Queue[(A, Deferred[F, Unit])]
+  )
 
   object State {
     def empty[F[_], A](capacity: Int): State[F, A] = State(Queue.empty, capacity, Queue.empty, Queue.empty)
   }
 
-  def producer[F[_]: Async: Console](id: Int, counterR: Ref[F, Int], stateR: Ref[F, State[F,Int]]): F[Unit] = {
+  def producer[F[_]: Async: Console](id: Int, counterR: Ref[F, Int], stateR: Ref[F, State[F, Int]]): F[Unit] = {
 
     def offer(i: Int): F[Unit] =
-      Deferred[F, Unit].flatMap[Unit]{ offerer =>
+      Deferred[F, Unit].flatMap[Unit] { offerer =>
         stateR.modify {
           case State(queue, capacity, takers, offerers) if takers.nonEmpty =>
             val (taker, rest) = takers.dequeue
@@ -46,7 +51,7 @@ object BoundedQueueConsumerProducer extends IOApp {
             val (i, rest) = queue.dequeue
             State(rest, capacity, takers, offerers) -> Async[F].pure(i)
           case State(queue, capacity, takers, offerers) if queue.nonEmpty =>
-            val (i, rest) = queue.dequeue
+            val (i, rest)               = queue.dequeue
             val ((move, release), tail) = offerers.dequeue
             State(rest.enqueue(move), capacity, takers, tail) -> release.complete(()).as(i)
           case State(queue, capacity, takers, offerers) if offerers.nonEmpty =>
@@ -66,7 +71,7 @@ object BoundedQueueConsumerProducer extends IOApp {
 
   override def run(args: List[String]): IO[ExitCode] =
     for {
-      stateR <- Ref.of[IO, State[IO, Int]](State.empty[IO, Int](capacity = 100))
+      stateR   <- Ref.of[IO, State[IO, Int]](State.empty[IO, Int](capacity = 100))
       counterR <- Ref.of[IO, Int](1)
       producers = List.range(1, 11).map(producer(_, counterR, stateR)) // 10 producers
       consumers = List.range(1, 11).map(consumer(_, stateR))           // 10 consumers
