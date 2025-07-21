@@ -29,8 +29,7 @@ object MyQueueConsumerProducer extends IOApp {
 
   override def run(args: List[String]): IO[ExitCode] =
     for {
-      stateR   <- Ref.of[IO, State[IO, Int]](State.empty[IO, Int](capacity = 200))
-      queue    <- MyQueue(stateR)
+      queue    <- MyQueue[IO, Int](200)
       counterR <- Ref.of[IO, Int](1)
       producers = List.range(1, 11).map(producer(_, counterR, queue)) // 10 producers
       consumers = List.range(1, 21).map(consumer(_, queue))           // 20 consumers

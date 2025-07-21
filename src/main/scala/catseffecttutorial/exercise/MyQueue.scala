@@ -57,3 +57,12 @@ class MyQueue[F[_]: Async, A](stateR: Ref[F, State[F, A]]) {
       }
     }
 }
+
+object MyQueue {
+
+  def apply[F[_]: Async, A](capacity: Int): F[MyQueue[F, A]] =
+    // new MyQueue(Ref.of[F, State[F, A]](State.empty[F, A](capacity)))
+    // Async[F].pure(new MyQueue[F, A](Ref.of[F, State[F, A]](State.empty[F, A](capacity))))
+    // I tried the above options but finally cheated :(
+    Ref.of[F, State[F, A]](State.empty[F, A](capacity)).map(stateRef => new MyQueue(stateRef))
+}
